@@ -22,8 +22,8 @@ int ReadButtonState = 0;
 int SendButtonState = 0;
 
 void setup() {
-  Serial.begin(9600);
-  irrecv.enableIRIn(); // Start the IR receiver
+  Serial.begin(9600);               // Start Serial for debugging
+  irrecv.enableIRIn();              // Start the IR receiver
   pinMode(SEND_BUTTON, INPUT);
   pinMode(READ_BUTTON, INPUT);
   Serial.print("Setup complete\n");
@@ -31,44 +31,49 @@ void setup() {
 
 void storeCode() {
   int count = results.rawlen;
-  codeLen = count - 1; // Store the raw length minus the gap
+  codeLen = count - 1;
   for (int i = 1; i <= codeLen; i++) {
     rawCodes[i - 1] = results.rawbuf[i] * USECPERTICK + (i % 2 == 0 ? MARK_EXCESS : -MARK_EXCESS);
   }
   codeValue = results.value;
+
   Serial.println("IR code received and stored.");
   myPrintResult();
 }
 
 void sendCode() {
-  irsend.sendRaw(rawCodes, codeLen, 38); // Assume 38 KHz for raw codes
+  irsend.sendRaw(rawCodes, codeLen, 38);
   Serial.println("Sent stored IR code as raw signal.");
 }
 
-void myPrintResult() {
+void myPrintResult() {                                        // Print out stored data
   irrecv.printResultShort(&Serial);
   Serial.println();
 }
 
 void loop() {
+  // Reading button state
   ReadButtonState = digitalRead(READ_BUTTON);
   SendButtonState = digitalRead(SEND_BUTTON);
 
   // Check for user input
   char input = Serial.read();
 
-  if (input == 's' || SendButtonState == HIGH) { // User types 's' to send the code
+  // Sending output
+  if (input == 's' || SendButtonState == HIGH) {              // User types 's' to send the code
     Serial.println("Sending stored IR code...");
     sendCode();
   }
-  else if (input == 'r' || ReadButtonState == HIGH) { // User types 'r' to start detection
+
+  // Reading input
+  else if (input == 'r' || ReadButtonState == HIGH) {            // Set flag to enable detection
     Serial.println("Looking for IR signal...");
-    detectSignal = true; // Set flag to enable detection
+    detectSignal = true;                              
   }
 
   // If in detection mode, look for IR signal
   if (detectSignal && irrecv.decode(&results)) {
-    storeCode();           // Store the detected code
+    storeCode();            // Store the detected code
     detectSignal = false;   // Stop detection after receiving one code
     irrecv.resume();        // Prepare for the next signal
   }
