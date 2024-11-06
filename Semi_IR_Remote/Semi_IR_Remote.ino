@@ -1,3 +1,13 @@
+/*
+
+This version is working on the 2.8.0 version of IRremote
+
+The program reads the IR signals and stores them in local memory to send
+
+Utilizes a functions from IRremote to send and process ir signals
+
+*/
+
 #include <IRremote.h>
 
 #define RAWBUF 100            // Maximum length of raw code buffer
