@@ -10,9 +10,9 @@ Utilizes a functions from IRremote to send and process ir signals
 
 #include <IRremote.h>
 
-#define RAWBUF 100            // Maximum length of raw code buffer
-#define USECPERTICK 50        // Duration of a tick in microseconds
-#define MARK_EXCESS 10        // Amount to adjust for receiver distortion
+#define RAWBUF 100                                              // Maximum length of raw code buffer
+#define USECPERTICK 50                                          // Duration of a tick in microseconds
+#define MARK_EXCESS 10                                          // Amount to adjust for receiver distortion
 
 int RECV_PIN = 11;
 int SEND_BUTTON = 5;
@@ -23,17 +23,17 @@ IRsend irsend;
 
 decode_results results;
 
-unsigned long codeValue;           // The decoded code value
-unsigned int rawCodes[RAWBUF];     // Stores raw durations of the signal
-int codeLen;                       // Length of the code
+unsigned long codeValue;                                        // The decoded code value
+unsigned int rawCodes[RAWBUF];                                  // Stores raw durations of the signal
+int codeLen;                                                    // Length of the code
 
-bool detectSignal = false;         // Flag to control signal detection
+bool detectSignal = false;                                      // Flag to control signal detection
 int ReadButtonState = 0;
 int SendButtonState = 0;
 
 void setup() {
-  Serial.begin(9600);               // Start Serial for debugging
-  irrecv.enableIRIn();              // Start the IR receiver
+  Serial.begin(115200);                                         // Start Serial for debugging
+  irrecv.enableIRIn();                                          // Start the IR receiver
   pinMode(SEND_BUTTON, INPUT);
   pinMode(READ_BUTTON, INPUT);
   Serial.print("Setup complete\n");
@@ -56,12 +56,13 @@ void sendCode() {
   Serial.println("Sent stored IR code as raw signal.");
 }
 
-void myPrintResult() {                                        // Print out stored data
+void myPrintResult() {                                          // Print out stored data
   irrecv.printResultShort(&Serial);
   Serial.println();
 }
 
 void loop() {
+  
   // Reading button state
   ReadButtonState = digitalRead(READ_BUTTON);
   SendButtonState = digitalRead(SEND_BUTTON);
@@ -70,21 +71,27 @@ void loop() {
   char input = Serial.read();
 
   // Sending output
-  if (input == 's' || SendButtonState == HIGH) {              // User types 's' to send the code
+  if (input == 's' || SendButtonState == HIGH) {                // User types 's' to send the code
     Serial.println("Sending stored IR code...");
     sendCode();
+    irrecv.enableIRIn();                                        // Re-enable receiver
   }
 
   // Reading input
-  else if (input == 'r' || ReadButtonState == HIGH) {            // Set flag to enable detection
+  else if (input == 'r' || ReadButtonState == HIGH) {           // Set flag to enable detection
     Serial.println("Looking for IR signal...");
     detectSignal = true;                              
+  } 
+  
+  // Printing the contents that is stored for testing
+  else if (input == 'p'){
+    myPrintResult();
   }
 
   // If in detection mode, look for IR signal
   if (detectSignal && irrecv.decode(&results)) {
-    storeCode();            // Store the detected code
-    detectSignal = false;   // Stop detection after receiving one code
-    irrecv.resume();        // Prepare for the next signal
+    storeCode();                                                // Store the detected code
+    detectSignal = false;                                       // Stop detection after receiving one code
+    irrecv.resume();                                            // Prepare for the next signal
   }
 }
