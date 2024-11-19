@@ -70,10 +70,6 @@ void myPrintResult() {
 }
 
 void loop() {
-
-  // Re-enable receiver
-  irrecv.enableIRIn();
-  
   // Reading button state
   ReadButtonState = digitalRead(READ_BUTTON);
   SendButtonState = digitalRead(SEND_BUTTON);
@@ -85,6 +81,8 @@ void loop() {
   if (input == 's' || SendButtonState == HIGH) {
     Serial.println("Sending stored IR code...");
     sendCode();
+    // Re-enable receiver
+    irrecv.enableIRIn();
   }
 
   // Changing flag to enable detection
